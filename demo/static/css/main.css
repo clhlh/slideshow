@@ -1,0 +1,3 @@
+#slideshow {width: 796px;height: 326px;margin: 0 auto;overflow: hidden;}
+.slideshow * {margin: 0;padding: 0;}
+#slideshow ul li {list-style: none;}
