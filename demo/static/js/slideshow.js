@@ -5,6 +5,7 @@ window.onload = function() {
             return
         }
 
+        var time_interval = 4300;
         var slideshow = window.document.getElementById('slideshow')
         var images = slideshow.getElementsByTagName('li')
         var length = images.length
@@ -12,13 +13,12 @@ window.onload = function() {
         slideshow.className = 'slideshow'
         images.item(current).className = 'active'
         var check_radio = createCheckRadio()
+        var spans = check_radio.getElementsByTagName("span");
+        var spans_length = spans.length;
 
         addCheckRadioClickEvent()
 
-        // var prev_left = document.createElement("div")
-        // prev_left.className = "prev_image"
-        // prev_left.innerText = "<"
-        // slideshow.appendChild(prev_left)
+        var showing = setInterval(autoSlideShow, time_interval)
 
         function createCheckRadio() {
             var check_radio = document.createElement('div')
@@ -36,9 +36,11 @@ window.onload = function() {
             return check_radio
         }
 
+        function autoSlideShow() {
+            spans.item((current + 1) % spans_length).click()
+        }
+
         function addCheckRadioClickEvent() {
-            var spans = check_radio.getElementsByTagName("span");
-            var spans_length = spans.length;
             for (var i = 0; i < spans_length; i++) {
                 (function(j) {
                     spans[j].onclick = function() {
@@ -47,11 +49,11 @@ window.onload = function() {
                         this.className = 'on'
 
                         if (current < j) {
-                            images[current].classList.add('moving_left')
-                            images[j].className = 'next moving_left'
+                            images.item(current).classList.add('moving_left')
+                            images.item(j).className = 'next moving_left'
                         } else {
-                            images[current].classList.add('moving_right')
-                            images[j].className = 'prev moving_right'
+                            images.item(current).classList.add('moving_right')
+                            images.item(j).className = 'prev moving_right'
                         }
 
                         // remove current span class="on"
@@ -62,13 +64,19 @@ window.onload = function() {
                         }
 
                         setTimeout(function(){
-                            images[current].removeAttribute("class")
-                            images[j].className = 'active'
+                            images.item(current).removeAttribute("class")
+                            images.item(j).className = 'active'
                             current = j
                         }, 300)
 
                     }
+
+                    images.item(j).onmouseover = function () {clearInterval(showing)}
+
+                    images.item(j).onmouseout = function () {showing = setInterval(autoSlideShow, time_interval)}
+
                 })(i)
+
             }
         }
 
