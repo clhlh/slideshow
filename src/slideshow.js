@@ -1,45 +1,83 @@
 window.onload = function() {
     function slideshow(slideshow) {
+        /**
+         * step1 check element and image length
+         */
+
         if (!window.document.getElementById(slideshow)) {
-            console.error('Slideshow Not Found')
+            console.error('#'+slideshow+' Not Found')
             return
         }
 
-        var slideshow = window.document.getElementById('slideshow')
+        var timeInterval = 4300, current = 0;
+
+        var slideshow = window.document.getElementById(slideshow)
         var images = slideshow.getElementsByTagName('li')
-        var length = images.length
-        var current = 0;
-        slideshow.className = 'slideshow'
-        images.item(current).className = 'active'
-        var check_radio = createCheckRadio()
+        var imageLength = images.length
 
-        addCheckRadioClickEvent()
+        slideshow.classList.add('slideshow')
+        images.item(current).classList.add('active')
 
-        // var prev_left = document.createElement("div")
-        // prev_left.className = "prev_image"
-        // prev_left.innerText = "<"
-        // slideshow.appendChild(prev_left)
+        if (imageLength == 1) return
 
-        function createCheckRadio() {
-            var check_radio = document.createElement('div')
-            check_radio.innerHTML = ''
-            for (var i = 0; i < length; i++) {
-                if (i == current) {
-                    check_radio.innerHTML += '<span class="on"></span>'
-                } else {
-                    check_radio.innerHTML += '<span></span>'
-                }
-            }
-            check_radio.className = 'check_radio'
-            slideshow.appendChild(check_radio)
-            check_radio.style.marginLeft = -check_radio.offsetWidth / 2
-            return check_radio
+        /**
+         * step2 createElement
+         */
+        var checkRadio = createCheckRadio()
+        var spans = checkRadio.getElementsByTagName("span")
+
+        var slidebar = createSlidebar()
+
+        bindSlideShowEvent()
+        var showing = setInterval(autoSlideShow, timeInterval)
+
+        function createSlidebar() {
+            var slidebar_left = document.createElement('div')
+            slidebar_left.className = 'slidebar_left'
+            slidebar_left.innerText = '‹'
+            slideshow.appendChild(slidebar_left)
+            slidebar_left.onclick = function() {var i = current <= 0 ? imageLength - 1 : current - 1;spans.item(i).click()}
+            slidebar_left.onmouseover = function() {AutoSlideShowControl(false)}
+            slidebar_left.onmouseout = function() {AutoSlideShowControl(true)}
+
+            var slidebar_right = document.createElement('div')
+            slidebar_right.className = 'slidebar_right'
+            slidebar_right.innerText = '›'
+            slideshow.appendChild(slidebar_right)
+            slidebar_right.onclick = function() {spans.item((current + 1) % imageLength).click()}
+            slidebar_right.onmouseover = function() {AutoSlideShowControl(false)}
+            slidebar_right.onmouseout = function() {AutoSlideShowControl(true)}
         }
 
-        function addCheckRadioClickEvent() {
-            var spans = check_radio.getElementsByTagName("span");
-            var spans_length = spans.length;
-            for (var i = 0; i < spans_length; i++) {
+        function createCheckRadio() {
+            var checkRadio = document.createElement('div')
+            checkRadio.innerHTML = ''
+            for (var i = 0; i < imageLength; i++) {
+                if (i == current) {
+                    checkRadio.innerHTML += '<span class="on"></span>'
+                } else {
+                    checkRadio.innerHTML += '<span></span>'
+                }
+            }
+            checkRadio.className = 'check_radio'
+            slideshow.appendChild(checkRadio)
+            return checkRadio
+        }
+
+        function autoSlideShow() {
+            spans.item((current + 1) % imageLength).click()
+        }
+
+        function AutoSlideShowControl(flag = false) {
+            if (!flag) {
+                clearInterval(showing)
+            } else {
+                showing = setInterval(autoSlideShow, timeInterval)
+            }
+        }
+
+        function bindSlideShowEvent() {
+            for (var i = 0; i < imageLength; i++) {
                 (function(j) {
                     spans[j].onclick = function() {
                         if (current === j) return
@@ -47,28 +85,38 @@ window.onload = function() {
                         this.className = 'on'
 
                         if (current < j) {
-                            images[current].classList.add('moving_left')
-                            images[j].className = 'next moving_left'
+                            images.item(current).classList.add('moving_left')
+                            images.item(j).className = 'next moving_left'
                         } else {
-                            images[current].classList.add('moving_right')
-                            images[j].className = 'prev moving_right'
+                            images.item(current).classList.add('moving_right')
+                            images.item(j).className = 'prev moving_right'
                         }
 
                         // remove current span class="on"
-                        for (var k = 0; k < spans_length; k++) {
+                        for (var k = 0; k < imageLength; k++) {
                             if (j !== k && spans.item(k).className == 'on') {
                                 spans.item(k).removeAttribute("class")
                             }
                         }
 
-                        setTimeout(function(){
-                            images[current].removeAttribute("class")
-                            images[j].className = 'active'
+                        setTimeout(function() {
+                            images.item(current).removeAttribute("class")
+                            images.item(j).className = 'active'
                             current = j
                         }, 300)
 
                     }
+
+                    images.item(j).onmouseover = function() {
+                        AutoSlideShowControl(false)
+                    }
+
+                    images.item(j).onmouseout = function() {
+                        AutoSlideShowControl(true)
+                    }
+
                 })(i)
+
             }
         }
 
